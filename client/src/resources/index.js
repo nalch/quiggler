@@ -9,5 +9,6 @@ export function configure(config) {
     PLATFORM.moduleName("./elements/merge-faces/merge-faces"),
     PLATFORM.moduleName("./elements/split-square/split-square"),
     PLATFORM.moduleName("./elements/voronoi/voronoi"),
+    PLATFORM.moduleName("./elements/quilt-modal/quilt-modal"),
   ]);
 }

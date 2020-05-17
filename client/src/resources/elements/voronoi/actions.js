@@ -1,4 +1,4 @@
-import * as d3 from "d3";
+import { Delaunay } from "d3-delaunay";
 
 export const triangulate = oldState => {
   const state = JSON.parse(JSON.stringify(oldState));
@@ -18,16 +18,19 @@ export const triangulate = oldState => {
 //    }
 //  });
 
-  const voronoi = d3.voronoi();
+
+
   selected.forEach(f => {
-    console.log(voronoi.links(f.nodes));
-    voronoi.triangles(f.nodes).forEach(t => {
+    const delaunay = Delaunay.from(f.nodes);
+//    console.log(voronoi.triangles(f.nodes).length);
+    for (let triangle of delaunay.trianglePolygons()) {
+      console.log(triangle);
       state.editor.faces.push({
         "id": Math.floor(Math.random() * 99999),
-        "nodes": t,
+        "nodes": triangle,
         "background": f.background,
       });
-    });
+    };
   });
 
   state.editor.faces = state.editor.faces.filter(f => !f.selected);
