@@ -1,7 +1,7 @@
 import cloneDeep from "lodash/cloneDeep";
 import remove from "lodash/remove";
 
-import { compareNodes } from "../../graph-utils";
+import { compareNodes, isRect } from "../../graph-utils";
 
 export const splitSquare = (oldState, direction) => {
   const state = JSON.parse(JSON.stringify(oldState));
@@ -9,26 +9,25 @@ export const splitSquare = (oldState, direction) => {
   const selected = state.editor.faces.filter(f => f.selected && f.nodes.length > 3);
 
   selected.forEach(f => {
-    if (f.nodes.length === 4) {
-      const sortedNodes = cloneDeep(f.nodes).sort(compareNodes);
-
+    const boundingRect = isRect(f.nodes);
+    if (boundingRect) {
       remove(state.editor.faces, newFace => newFace.id === f.id);
 
       // edge start, end, nodes1, nodes2
       let coordinates;
       if (direction) {
         coordinates = [
-          sortedNodes[0],
-          sortedNodes[3],
-          [sortedNodes[0], sortedNodes[1], sortedNodes[3]],
-          [sortedNodes[0], sortedNodes[3], sortedNodes[2]]
+          boundingRect[0],
+          boundingRect[3],
+          [boundingRect[0], boundingRect[1], boundingRect[3]],
+          [boundingRect[0], boundingRect[3], boundingRect[2]]
         ];
       } else {
         coordinates = [
-          sortedNodes[1],
-          sortedNodes[2],
-          [sortedNodes[0], sortedNodes[1], sortedNodes[2]],
-          [sortedNodes[1], sortedNodes[2], sortedNodes[3]]
+          boundingRect[1],
+          boundingRect[2],
+          [boundingRect[0], boundingRect[1], boundingRect[2]],
+          [boundingRect[1], boundingRect[2], boundingRect[3]]
         ];
       }
       state.editor.links.push({"source": coordinates[0], "target": coordinates[1]});
