@@ -6,6 +6,7 @@ import { pluck } from "rxjs/operators";
 import * as d3 from "d3";
 
 import { selectFace, selectNode } from "../../editor-actions";
+import { computeNeighbours } from "../../graph-utils";
 
 
 @inject(Store)
@@ -72,7 +73,7 @@ export class QuiltDisplay {
 
     if (this.state.links) {
       this.link = this.svg.append("g")
-          .attr("stroke", "#ccc")
+          .attr("stroke", "#888")
           .attr("stroke-opacity", 0.6)
         .selectAll("line")
         .data(this.state.links)
