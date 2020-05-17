@@ -1,0 +1,27 @@
+<template>
+  <div id="new-quilt-modal" md-modal md-modal.ref="modal">
+    <div class="modal-content">
+      <h4>New Quilt</h4>
+      <p>Generate a new quilt</p>
+      <div class="row">
+        <md-input class="col s3" type="number" label="Columns" validate="true" validate-error="invalid column value" value.bind="columns"></md-input>
+        <md-input class="col s3" type="number" label="Rows" validate="true" validate-error="invalid row value" value.bind="rows"></md-input>
+      </div>
+      <div class="row">
+        <md-input class="col s3" type="number" label="width" validate="true" validate-error="invalid width value" value.bind="width"></md-input>
+        <md-input class="col s3" type="number" label="height" validate="true" validate-error="invalid height value" value.bind="height"></md-input>
+        <div class="col s3">
+          <select md-select="label: Unit" value.two-way="unit">
+            <option value="cm" selected>cm</option>
+            <option value="inch">inch</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <a click.delegate="cancel()" md-button="flat: true;" md-waves="color: accent;" class="modal-action modal-close">Cancel</a>
+      <a click.delegate="create()" md-button="flat: true;" md-waves="color: accent;" class="modal-action modal-close">Create</a>
+    </div>
+  </div>
+</template>
