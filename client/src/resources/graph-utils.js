@@ -1,4 +1,5 @@
 import isEqual from "lodash/isEqual";
+import remove from "lodash/remove";
 
 export const findEdge = (links, n1, n2) => {
   return links.find(l =>
@@ -34,4 +35,39 @@ export const isRect = nodes => {
   }
 
   return null;
+};
+
+export const computeOuterEdges = (links, f) => {
+  const nodes = f.nodes;
+
+  const edgeToFaces = new Map();
+  for (let i=0; i<nodes.length; i++) {
+    const node = nodes[i];
+    let nextNode = (i<nodes.length-1) ? nextNode = nodes[i + 1] : nextNode = nodes[0];
+    const edge = findEdge(links, node, nextNode);
+
+    if (!edgeToFaces.get(edge.index)) {
+      edgeToFaces.set(edge.index, {"edge": edge, "faces": []});
+    }
+    edgeToFaces.get(edge.index).faces.push(f);
+  }
+
+  const outerEdges = Array.from(edgeToFaces.values()).filter(i => i.faces.length === 1).map(i => i.edge);
+  let currentEdge = outerEdges.pop();
+  let nextPoint = currentEdge.target;
+  const points = [currentEdge.source, currentEdge.target];
+  do {
+    currentEdge = findNextNode(outerEdges, nextPoint);
+
+    nextPoint = points.find(p => isEqual(currentEdge.source, p)) ? currentEdge.target : currentEdge.source;
+    points.push(nextPoint);
+    remove(outerEdges, e => isEqual(e.source, currentEdge.source) && isEqual(e.target, currentEdge.target));
+  } while(outerEdges.length > 1);
+
+  return points;
+}
+
+export const computeNeighbours = (links, face) => {
+  // neighbouring edges and node circle for faces
+  console.log(computeOuterEdges(links, face));
 };

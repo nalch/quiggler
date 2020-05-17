@@ -1,7 +1,7 @@
 import cloneDeep from "lodash/cloneDeep";
 import remove from "lodash/remove";
 
-import { compareNodes, isRect } from "../../graph-utils";
+import { isRect } from "../../graph-utils";
 
 export const splitSquare = (oldState, direction) => {
   const state = JSON.parse(JSON.stringify(oldState));
@@ -16,18 +16,20 @@ export const splitSquare = (oldState, direction) => {
       // edge start, end, nodes1, nodes2
       let coordinates;
       if (direction) {
+        // direction: \
         coordinates = [
           boundingRect[0],
           boundingRect[3],
-          [boundingRect[0], boundingRect[1], boundingRect[3]],
-          [boundingRect[0], boundingRect[3], boundingRect[2]]
+          f.nodes.filter(n => n[0] === boundingRect[1][0] || n[1] === boundingRect[1][1]),
+          f.nodes.filter(n => n[0] === boundingRect[2][0] || n[1] === boundingRect[2][1])
         ];
       } else {
+        // direction: /
         coordinates = [
           boundingRect[1],
           boundingRect[2],
-          [boundingRect[0], boundingRect[1], boundingRect[2]],
-          [boundingRect[1], boundingRect[2], boundingRect[3]]
+          f.nodes.filter(n => n[0] === boundingRect[0][0] || n[1] === boundingRect[0][1]),
+          f.nodes.filter(n => n[0] === boundingRect[3][0] || n[1] === boundingRect[3][1])
         ];
       }
       state.editor.links.push({"source": coordinates[0], "target": coordinates[1]});
