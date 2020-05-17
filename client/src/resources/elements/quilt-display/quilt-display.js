@@ -5,7 +5,7 @@ import { pluck } from "rxjs/operators";
 
 import * as d3 from "d3";
 
-import { selectFace } from "../../editor-actions";
+import { selectFace, selectNode } from "../../editor-actions";
 
 
 @inject(Store)
@@ -17,6 +17,7 @@ export class QuiltDisplay {
   constructor(store) {
     this.store = store;
     this.store.registerAction('selectFace', selectFace);
+    this.store.registerAction('selectNode', selectNode);
   }
 
   stateChanged(state) {
@@ -67,7 +68,7 @@ export class QuiltDisplay {
       .append("polygon")
         .attr("points", d => d.nodes.map(n => n.map(c => c * this.factor).join(",")).join(" "))
         .attr("title", d => d.id)
-        .on("click", this.click.bind(this));
+        .on("click", this.clickFace.bind(this));
 
     if (this.state.links) {
       this.link = this.svg.append("g")
@@ -80,20 +81,26 @@ export class QuiltDisplay {
     }
 
     this.node = this.svg.append("g")
+        .attr("fill", "#99b")
         .attr("stroke", "#99b")
         .attr("stroke-width", 1)
       .selectAll("circle")
       .data(this.state.nodes)
       .join("circle")
-        .attr("r", 0.5);
+        .attr("r", 0.5)
+        .on("click", this.clickNode.bind(this));
 
     this.svgContainer.appendChild(this.svg.node());
 
     this.redraw();
   }
 
-  click(d) {
+  clickFace(d) {
     this.store.dispatch(selectFace, d);
+  }
+
+  clickNode(n) {
+    this.store.dispatch(selectNode, n);
   }
 
   faceBackground(d) {
@@ -121,6 +128,9 @@ export class QuiltDisplay {
     this.node
       .data(this.state.nodes)
       .attr("cx", d => d.cx * this.factor)
-      .attr("cy", d => d.cy * this.factor);
+      .attr("cy", d => d.cy * this.factor)
+      .attr("r", d => d.selected ? 3 : 0.5)
+      .attr("stroke-width", d => d.selected ? 1.5 : 1)
+      .attr("fill", d => d.selected ? "#eef" : "99b");
   }
 }

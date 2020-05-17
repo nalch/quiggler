@@ -1,3 +1,5 @@
+import isEqual from "lodash/isEqual";
+
 export const loadGraph = (oldState, data) => {
   const state = JSON.parse(JSON.stringify(oldState));
   state.editor.width = data.width;
@@ -19,6 +21,15 @@ export const selectFace = (oldState, face) => {
 
   const newFace = state.editor.faces.find(f => f.id === face.id);
   newFace.selected = !newFace.selected;
+
+  return state;
+};
+
+export const selectNode = (oldState, node) => {
+  const state = JSON.parse(JSON.stringify(oldState));
+
+  const selectedNode = state.editor.nodes.find(n => isEqual(n.id, node.id));
+  selectedNode.selected = !selectedNode.selected;
 
   return state;
 };
