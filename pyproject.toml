@@ -17,6 +17,7 @@ django-filter = "^2.2.0"
 coreapi = "^2.3.3"
 Pillow = "^7.1.2"
 boltons = "^20.1.0"
+django-cors-headers = "^3.2.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.3."

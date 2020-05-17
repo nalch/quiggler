@@ -25,6 +25,13 @@ sdist: build_reqs
 
 lint: dev_reqs plain-lint
 
+serve-client:
+	cd client && au run
+
+serve-api:
+	poetry run python manage.py migrate
+	poetry run python manage.py runserver
+
 docs: dev_reqs
 	poetry run $(MAKE) -C docs html
 
