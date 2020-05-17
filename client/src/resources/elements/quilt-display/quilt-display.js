@@ -97,11 +97,15 @@ export class QuiltDisplay {
   }
 
   clickFace(d) {
-    this.store.dispatch(selectFace, d);
+    if (this.state.mode === "face") {
+      this.store.dispatch(selectFace, d);
+    }
   }
 
   clickNode(n) {
-    this.store.dispatch(selectNode, n);
+    if (this.state.mode === "node") {
+      this.store.dispatch(selectNode, n);
+    }
   }
 
   faceBackground(d) {
@@ -110,6 +114,18 @@ export class QuiltDisplay {
     }
 
     return "#fff";  // todo: transparent pattern
+  }
+
+  nodeRadius(d) {
+    if (d.selected) {
+      return 3;
+    }
+
+    if (this.state.mode === "node") {
+      return 1.5;
+    }
+
+    return 0.5;
   }
 
   redraw() {
@@ -130,7 +146,7 @@ export class QuiltDisplay {
       .data(this.state.nodes)
       .attr("cx", d => d.cx * this.factor)
       .attr("cy", d => d.cy * this.factor)
-      .attr("r", d => d.selected ? 3 : 0.5)
+      .attr("r", this.nodeRadius.bind(this))
       .attr("stroke-width", d => d.selected ? 1.5 : 1)
       .attr("fill", d => d.selected ? "#eef" : "99b");
   }

@@ -36,12 +36,21 @@ export const selectNode = (oldState, node) => {
 
 export const selectAll = oldState => {
   const state = JSON.parse(JSON.stringify(oldState));
-  state.editor.faces.forEach(f => f.selected = true);
+
+  let elements;
+  if (state.editor.mode === "face") {
+    elements = state.editor.faces;
+  } else if (state.editor.mode === "node") {
+    elements = state.editor.nodes;
+  }
+
+  elements.forEach(e => e.selected = true);
   return state;
 };
 
 export const deselect = oldState => {
   const state = JSON.parse(JSON.stringify(oldState));
   state.editor.faces.forEach(f => f.selected = false);
+  state.editor.nodes.forEach(n => n.selected = false);
   return state;
 };

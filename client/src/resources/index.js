@@ -10,5 +10,6 @@ export function configure(config) {
     PLATFORM.moduleName("./elements/split-square/split-square"),
     PLATFORM.moduleName("./elements/voronoi/voronoi"),
     PLATFORM.moduleName("./elements/quilt-modal/quilt-modal"),
+    PLATFORM.moduleName("./elements/select-mode/select-mode"),
   ]);
 }
