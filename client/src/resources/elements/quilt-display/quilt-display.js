@@ -15,6 +15,8 @@ export class QuiltDisplay {
   factor = 30;
   margin = 5;
 
+  width = 0;
+
   constructor(store) {
     this.store = store;
     this.store.registerAction('selectFace', selectFace);
@@ -24,6 +26,8 @@ export class QuiltDisplay {
   stateChanged(state) {
     this.state = state;
     if (state.width && state.height) {
+      this.width = state.width;
+      this.height = state.height;
       this.update();
     }
   }
@@ -36,15 +40,17 @@ export class QuiltDisplay {
       .force("y", d3.forceY())
       .stop();
 
-    const viewWidth = 450
-    const viewHeight = 600
-
     if (this.svg) {
       this.svg.remove();
     }
 
+    this.screenWidth = this.svgContainer.offsetWidth;
+    this.factor = Math.floor(this.screenWidth / (this.width - 1));
+    const viewWidth = this.factor * this.width;
+    const viewHeight = this.factor * this.height;
+
     this.svg = d3.create("svg")
-      .attr("viewBox", [0, 0, viewWidth, viewHeight]);
+      .attr("viewBox", [0, 0, this.factor * this.width, viewHeight]);
 
     const defs = this.svg.append("defs")
     // size in svg
