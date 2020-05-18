@@ -23,7 +23,7 @@ export class ColorPicker {
         parent: this.colorPicker,
         popup: false,
         alpha: false,
-        editor: false,
+        editor: true,
         color: 'orangered',
         onChange: color => {
           this.color = color.rgbaString;
