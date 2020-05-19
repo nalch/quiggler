@@ -38,6 +38,8 @@ class Quilt(SlugModel):
     width_in_cm = models.DecimalField(decimal_places=2, max_digits=12)
     height_in_cm = models.DecimalField(decimal_places=2, max_digits=12)
 
+    public = models.BooleanField(default=False)
+
     json = models.TextField(blank=True, null=True)
 
     # todo krsc: nodes, links, faces

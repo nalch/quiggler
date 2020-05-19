@@ -1,5 +1,5 @@
 <template>
-  <div id="new-quilt-modal" md-modal md-modal.ref="modal">
+  <div id="new-quilt-modal" md-modal md-modal.ref="modal" md-on-open-start.delegate="onOpenStart($event)">
     <div class="modal-content">
       <h4>New Quilt</h4>
       <p>Generate a new quilt</p>

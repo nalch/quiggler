@@ -19,7 +19,7 @@ export class QuiltModal {
       height_in_cm: Number(this.height),
       type: "square"
     };
-    debugger;
+
     return this.client.fetch("quilts/", {
       method: 'POST',
       body: json(quiltData)
@@ -29,4 +29,13 @@ export class QuiltModal {
   }
 
   cancel() {}
+
+  onOpenStart(e) {
+    this.name = "";
+    this.width = "";
+    this.height = "";
+    this.public = false;
+    this.columns = "";
+    this.rows = "";
+  }
 }
