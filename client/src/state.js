@@ -6,6 +6,6 @@ export const initialState = {
     links: [],
     faces: [],
     fabrics: [],
-    mode: "face",
+    mode: "face"
   }
 };

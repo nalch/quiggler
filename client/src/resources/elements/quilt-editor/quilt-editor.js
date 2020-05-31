@@ -68,6 +68,7 @@ export class QuiltEditor {
     baseGraph.nodes = this.state.nodes;
     baseGraph.links = this.state.links;
     baseGraph.faces = this.state.faces;
+    baseGraph.fabrics = this.state.fabrics;
     return this.client.fetch(`quilts/${this.slug}/`, {
       method: 'PATCH',
       body: json({"json": JSON.stringify(baseGraph)})

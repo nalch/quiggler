@@ -25,7 +25,7 @@ export const merge = state => {
     }
   }
 
-  // add new face
+  // find new face
   const outerEdges = Array.from(edgeToFaces.values()).filter(i => i.faces.length === 1).map(i => i.edge);
   let currentEdge = outerEdges.pop();
   let nextPoint = currentEdge.target;
@@ -38,6 +38,13 @@ export const merge = state => {
     remove(outerEdges, e => isEqual(e.source, currentEdge.source) && isEqual(e.target, currentEdge.target));
   } while(outerEdges.length > 1);
 
+  // remove old edges/faces
+  remove(
+    state.editor.links,
+    l => edgeToFaces.has(l.index) && edgeToFaces.get(l.index).faces.length !== 1
+  );
+  remove(state.editor.faces, f => f.selected);
+
   const newFace = {
     "id": selected[0].id,
     "nodes": points,
@@ -45,12 +52,5 @@ export const merge = state => {
   };
   state.editor.faces.push(newFace);
 
-  // remove old edges/faces
-  state.editor.links = state.editor.links.filter(
-    l => !edgeToFaces.has(l.index) ||
-    edgeToFaces.get(l.index).faces.length === 1
-  );
-  state.editor.faces = state.editor.faces.filter(f => !f.selected);
-
-  return JSON.parse(JSON.stringify(state));
+  return state;
 };

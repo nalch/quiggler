@@ -3,22 +3,23 @@ import { Store, connectTo } from "aurelia-store";
 
 import { pluck } from "rxjs/operators";
 
-import { triangulate } from "./actions";
+import { connect } from "./actions";
 
 @inject(Store)
 @connectTo((store) => store.state.pipe(pluck('editor')))
-export class Voronoi {
+export class Connect {
+  connectable = true;
 
   constructor(store) {
     this.store = store;
-    this.store.registerAction("triangulate", triangulate);
+    this.store.registerAction("connect", connect);
   }
 
   stateChanged(state) {
-    this.state = state;
+    this.connectable = state.nodes.filter(f => f.selected).length > 1;
   }
 
-  triangulateFace() {
-    this.store.dispatch(triangulate);
+  connectSelected() {
+    this.store.dispatch(connect);
   }
 }

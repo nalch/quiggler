@@ -1,5 +1,4 @@
-export const setFabric = (oldState, fabric) => {
-  const state = JSON.parse(JSON.stringify(oldState));
+export const setFabric = (state, fabric) => {
   state.editor.faces.filter(f => f.selected).forEach(face => {
     face.background = "url(#pattern-" + fabric + ")";
   });

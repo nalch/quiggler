@@ -3,9 +3,7 @@ import remove from "lodash/remove";
 
 import { isRect } from "../../graph-utils";
 
-export const splitSquare = (oldState, direction) => {
-  const state = JSON.parse(JSON.stringify(oldState));
-
+export const splitSquare = (state, direction) => {
   const selected = state.editor.faces.filter(f => f.selected && f.nodes.length > 3);
 
   selected.forEach(f => {
@@ -32,6 +30,8 @@ export const splitSquare = (oldState, direction) => {
           f.nodes.filter(n => n[0] === boundingRect[3][0] || n[1] === boundingRect[3][1])
         ];
       }
+
+      // add new elements
       state.editor.links.push({"source": coordinates[0], "target": coordinates[1]});
       state.editor.faces.push({
         "id": f.id,
@@ -39,7 +39,7 @@ export const splitSquare = (oldState, direction) => {
         "background": f.background,
       });
       state.editor.faces.push({
-        "id": f.id + "-2",
+        "id": Math.max(...state.editor.faces.map(f => f.id)) + 1,
         "nodes": coordinates[3],
         "background": f.background,
       });

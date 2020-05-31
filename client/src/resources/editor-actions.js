@@ -1,7 +1,6 @@
 import isEqual from "lodash/isEqual";
 
-export const loadGraph = (oldState, data) => {
-  const state = JSON.parse(JSON.stringify(oldState));
+export const loadGraph = (state, data) => {
   state.editor.width = data.width;
   state.editor.height = data.height;
   state.editor.fabrics = data.fabrics;
@@ -16,27 +15,17 @@ export const loadGraph = (oldState, data) => {
   return state;
 };
 
-export const selectFace = (oldState, face) => {
-  const state = JSON.parse(JSON.stringify(oldState));
-
-  const newFace = state.editor.faces.find(f => f.id === face.id);
-  newFace.selected = !newFace.selected;
-
+export const selectFace = (state, face) => {
+  face.selected = !face.selected;
   return state;
 };
 
-export const selectNode = (oldState, node) => {
-  const state = JSON.parse(JSON.stringify(oldState));
-
-  const selectedNode = state.editor.nodes.find(n => isEqual(n.id, node.id));
-  selectedNode.selected = !selectedNode.selected;
-
+export const selectNode = (state, node) => {
+  node.selected = !node.selected;
   return state;
 };
 
-export const selectAll = oldState => {
-  const state = JSON.parse(JSON.stringify(oldState));
-
+export const selectAll = state => {
   let elements;
   if (state.editor.mode === "face") {
     elements = state.editor.faces;
@@ -48,8 +37,7 @@ export const selectAll = oldState => {
   return state;
 };
 
-export const deselect = oldState => {
-  const state = JSON.parse(JSON.stringify(oldState));
+export const deselect = state => {
   state.editor.faces.forEach(f => f.selected = false);
   state.editor.nodes.forEach(n => n.selected = false);
   return state;

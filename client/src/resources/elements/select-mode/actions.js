@@ -1,5 +1,4 @@
-export const selectMode = (oldState, mode) => {
-  const state = JSON.parse(JSON.stringify(oldState));
+export const selectMode = (state, mode) => {
   state.editor.mode = mode;
   return state;
 };
