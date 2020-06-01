@@ -35,12 +35,15 @@ export class QuiltDisplay {
     this.store.registerAction('selectNode', selectNode);
   }
 
-  stateChanged(state, oldState) {
+  stateChanged(state) {
     this.state = state;
 
     if (state.width && state.height && this.svgContainer.offsetWidth) {
+      const oldWidth = this.width;
+      const oldHeight = this.height;
       this.width = state.width;
       this.height = state.height;
+
       if (!this.svg) {
         this.createSvg();
         logger.info("Created Svg");
@@ -50,14 +53,22 @@ export class QuiltDisplay {
         logger.info("Setup Done", this.state);
       }
       else {
-        if (state.mode !== oldState.mode) {
-          this.redraw();
+        // todo: check
+//        if (state.mode !== oldState.mode) {
+//          this.redraw();
+//        }
+        if (this.width !== oldWidth || this.height !== oldHeight) {
+          logger.debug("Update Viewbox");
+          if (this.zoom) {
+            this.updateViewBox(this.zoom);
+          }
         }
       }
     }
   }
 
   zoomChanged(zoom) {
+    this.zoom = zoom;
     if (this.svg) {
       this.updateViewBox(zoom);
     }
@@ -238,9 +249,9 @@ export class QuiltDisplay {
               d3.select(this.svgContainer)
                 .select("#node-group")
                 .append("circle")
-                  .attr("id", nodeId)
+                  .attr("id", nodeId(n))
                   .on("click", partial(this.clickNode.bind(this), n));
-              this.updateLink(l);
+              this.updateNode(n);
             });
           }
         }
@@ -278,6 +289,7 @@ export class QuiltDisplay {
     face.setAttribute("stroke", f.selected ? "#99b" : "#ccc");
     face.setAttribute("stroke-width", f.selected ? "1" : "0");
     face.setAttribute("fill", faceBackground(f));
+    face.setAttribute("points", f.nodes.map(n => n.map(c => c * this.factor).join(",")).join(" "));
   }
 
   updateNode(n) {
