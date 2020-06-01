@@ -7,5 +7,10 @@ export const initialState = {
     faces: [],
     fabrics: [],
     mode: "face"
+  },
+  zoom: {
+    level: 100,
+    offsetX: 0,
+    offsetY: 0
   }
 };

@@ -11,5 +11,6 @@ export function configure(config) {
     PLATFORM.moduleName("./elements/quilt-modal/quilt-modal"),
     PLATFORM.moduleName("./elements/select-mode/select-mode"),
     PLATFORM.moduleName("./elements/connect/connect"),
+    PLATFORM.moduleName("./elements/zoom/zoom"),
   ]);
 }

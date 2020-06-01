@@ -15,7 +15,12 @@ import { computeNeighbours } from "../../graph-utils";
 const logger = LogManager.getLogger("QuiltDisplay");
 
 @inject(Store, BindingEngine)
-@connectTo((store) => store.state.pipe(pluck('editor')))
+@connectTo({
+    selector: {
+      state: (store) => store.state.pipe(pluck('editor')),
+      zoom: (store) => store.state.pipe(pluck('zoom'))
+    }
+  })
 export class QuiltDisplay {
   factor = 30;
   margin = 5;
@@ -52,6 +57,12 @@ export class QuiltDisplay {
     }
   }
 
+  zoomChanged(zoom) {
+    if (this.svg) {
+      this.updateViewBox(zoom);
+    }
+  }
+
   createSvg() {
     this.simulation = d3.forceSimulation(this.state.nodes)
       .force("charge", d3.forceManyBody().strength(-80))
@@ -70,7 +81,7 @@ export class QuiltDisplay {
     const viewHeight = this.factor * this.height;
 
     this.svg = d3.create("svg")
-      .attr("viewBox", [0, 0, this.factor * this.width, viewHeight]);
+      .attr("viewBox", [0, 0, viewWidth, viewHeight]);
 
     const defs = this.svg.append("defs")
     // size in svg
@@ -284,6 +295,19 @@ export class QuiltDisplay {
     link.setAttribute("y1", l.source[1] * this.factor);
     link.setAttribute("x2", l.target[0] * this.factor);
     link.setAttribute("y2", l.target[1] * this.factor);
+  }
+
+  updateViewBox(zoom) {
+    this.screenWidth = this.svgContainer.offsetWidth;
+    this.screenHeight = this.svgContainer.offsetHeight;
+    this.factor = Math.floor(this.screenWidth / (this.width - 1));
+    const viewWidth = this.factor * this.width * (100/zoom.level);
+    const viewHeight = this.factor * this.height * (100/zoom.level);
+
+    const xOffset = this.screenWidth * (zoom.xOffset/100);
+    const yOffset = this.screenHeight * (zoom.yOffset/100);
+
+    this.svg.attr("viewBox", [xOffset || 0, yOffset || 0, viewWidth, viewHeight]);
   }
 
   redraw() {
