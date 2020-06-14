@@ -40,13 +40,14 @@ export const addLine = (state, direction) => {
     const facePoints = [];
     sortedNodes.forEach((point, idx) => {
       const nextPoint = idx < sortedNodes.length - 2 ? sortedNodes[idx+1] : sortedNodes[0];
-      // index -> right
-      if (point[0] === index && nextPoint[0] > idx) {
-        facePoints.push([point[0], point[1]]);
-      }
 
       // left -> right
       facePoints.push([point[0] <= index ? point[0] : point[0] + 1, point[1]]);
+
+      // index -> right
+      if (point[0] === index && nextPoint[0] > idx) {
+        facePoints.push([point[0] + 1, point[1]]);
+      }
     });
 
     f.nodes = facePoints;
