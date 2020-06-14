@@ -1,4 +1,4 @@
-import { getEdges, connectEdges } from "../../graph-utils";
+import { getEdges, connectEdges, polyIntersect } from "../../graph-utils";
 
 export const addLine = (state, direction) => {
   // example: column at index 1
@@ -54,11 +54,15 @@ export const addLine = (state, direction) => {
 
   // add new faces
   for (let row=0; row < state.editor.height; row++) {
-    newFaces.push({
-      "id": startId + row,
-      "nodes": [[index, row], [index + 1, row], [index + 1, row + 1], [index, row + 1]],
-      "background": "#eee",
-    });
+    const newNodes = [[index, row], [index + 1, row], [index + 1, row + 1], [index, row + 1]];
+    const intersects = stretchFaces.some(f => polyIntersect(f.nodes, newNodes));
+    if (!intersects) {
+      newFaces.push({
+        "id": startId + row,
+        "nodes": newNodes,
+        "background": "#eee",
+      });
+    }
   }
   state.editor.faces.splice(0, 0, ...newFaces);
 

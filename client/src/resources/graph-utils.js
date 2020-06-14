@@ -1,5 +1,6 @@
 import isEqual from "lodash/isEqual";
 import remove from "lodash/remove";
+import PolyBool from "polybooljs";
 
 export const compareNodes = (n1, n2) => {
   if (n1[1] !== n2[1]) {
@@ -61,4 +62,15 @@ export const connectEdges = edges => {
   }
 
   return nodes;
+};
+
+export const polyIntersect = (p1, p2) => {
+  const intersection = PolyBool.intersect({
+    regions: [p1],
+    inverted: false
+  }, {
+    regions: [p2],
+    inverted: false
+  });
+  return intersection.regions.length !== 0;
 };
