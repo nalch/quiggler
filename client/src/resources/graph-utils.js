@@ -1,19 +1,6 @@
 import isEqual from "lodash/isEqual";
 import remove from "lodash/remove";
 
-export const findEdge = (links, n1, n2) => {
-  return links.find(l =>
-    (isEqual(l.source, n1) && isEqual(l.target, n2)) ||
-    (isEqual(l.source, n2) && isEqual(l.target, n1))
-  );
-};
-
-export const findNextNode = (links, nextNode) => {
-  return links.find(l =>
-    isEqual(l.source, nextNode) || isEqual(l.target, nextNode)
-  );
-};
-
 export const compareNodes = (n1, n2) => {
   if (n1[1] !== n2[1]) {
     return n1[1] - n2[1];
@@ -37,37 +24,41 @@ export const isRect = nodes => {
   return null;
 };
 
-export const computeOuterEdges = (links, f) => {
-  const nodes = f.nodes;
-
-  const edgeToFaces = new Map();
-  for (let i=0; i<nodes.length; i++) {
-    const node = nodes[i];
-    let nextNode = (i<nodes.length-1) ? nextNode = nodes[i + 1] : nextNode = nodes[0];
-    const edge = findEdge(links, node, nextNode);
-
-    if (!edgeToFaces.get(edge.index)) {
-      edgeToFaces.set(edge.index, {"edge": edge, "faces": []});
+export const getEdges = faces => {
+  return faces.reduce((edgeMap, face) => {
+    const nodes = face.nodes;
+    for (let i=1; i<nodes.length; i++) {
+      const edge = [nodes[i-1], nodes[i]].sort(compareNodes);
+      const edgeId = `${edge[0]}->${edge[1]}`;
+      if (!edgeMap.has(edgeId)) {
+        edgeMap.set(edgeId, [edge, []]);
+      }
+      edgeMap.get(edgeId)[1].push(face);
     }
-    edgeToFaces.get(edge.index).faces.push(f);
+
+    const edge = [nodes[nodes.length - 1], nodes[0]].sort(compareNodes);
+    const edgeId = `${edge[0]}->${edge[1]}`;
+    if (!edgeMap.has(edgeId)) {
+      edgeMap.set(edgeId, [edge, []]);
+    }
+    edgeMap.get(edgeId)[1].push(face);
+
+    return edgeMap;
+  }, new Map());
+};
+
+export const connectEdges = edges => {
+  const nodes = [edges[0][0], edges[0][1]];
+  let currentNode = nodes[1];
+  edges.shift();
+
+  const max = edges.length - 1;
+  for (let i=0; i<max; i++) {
+    const nextEdge = remove(edges, e => isEqual(e[0], currentNode) || isEqual(e[1], currentNode))[0];
+
+    currentNode = isEqual(nextEdge[0], currentNode) ? nextEdge[1] : nextEdge[0];
+    nodes.push(currentNode);
   }
 
-  const outerEdges = Array.from(edgeToFaces.values()).filter(i => i.faces.length === 1).map(i => i.edge);
-  let currentEdge = outerEdges.pop();
-  let nextPoint = currentEdge.target;
-  const points = [currentEdge.source, currentEdge.target];
-  do {
-    currentEdge = findNextNode(outerEdges, nextPoint);
-
-    nextPoint = points.find(p => isEqual(currentEdge.source, p)) ? currentEdge.target : currentEdge.source;
-    points.push(nextPoint);
-    remove(outerEdges, e => isEqual(e.source, currentEdge.source) && isEqual(e.target, currentEdge.target));
-  } while(outerEdges.length > 1);
-
-  return points;
-}
-
-export const computeNeighbours = (links, face) => {
-  // neighbouring edges and node circle for faces
-  console.log(computeOuterEdges(links, face));
+  return nodes;
 };

@@ -77,7 +77,7 @@ export class QuiltDisplay {
   createSvg() {
     this.simulation = d3.forceSimulation(this.state.nodes)
       .force("charge", d3.forceManyBody().strength(-80))
-      .force("link", d3.forceLink(this.state.links).distance(20).strength(1).iterations(10))
+//      .force("link", d3.forceLink(this.state.links).distance(20).strength(1).iterations(10))
       .force("x", d3.forceX())
       .force("y", d3.forceY())
       .stop();
@@ -122,17 +122,17 @@ export class QuiltDisplay {
         .attr("title", d => d.id)
         .on("click", this.clickFace.bind(this));
 
-    if (this.state.links) {
-      this.d3Links = this.svg.append("g")
-          .attr("id", "link-group")
-          .attr("stroke", "#888")
-          .attr("stroke-opacity", 0.6)
-          .attr("stroke-width", 0.5)
-        .selectAll("line")
-        .data(this.state.links)
-        .join("line")
-          .attr("id", linkId);
-    }
+//    if (this.state.links) {
+//      this.d3Links = this.svg.append("g")
+//          .attr("id", "link-group")
+//          .attr("stroke", "#888")
+//          .attr("stroke-opacity", 0.6)
+//          .attr("stroke-width", 0.5)
+//        .selectAll("line")
+//        .data(this.state.links)
+//        .join("line")
+//          .attr("id", linkId);
+//    }
 
     this.d3Nodes = this.svg.append("g")
         .attr("id", "node-group")
@@ -176,10 +176,10 @@ export class QuiltDisplay {
   setupObserver() {
     this.state.faces = this.proxyElements(this.state.faces, this.updateFace.bind(this));
     this.state.nodes = this.proxyElements(this.state.nodes, this.updateNode.bind(this));
-    this.state.links = this.proxyElements(this.state.links, this.updateLink.bind(this));
+//    this.state.links = this.proxyElements(this.state.links, this.updateLink.bind(this));
 
     this.d3Nodes = this.d3Nodes.data(this.state.nodes);
-    this.d3Links = this.d3Links.data(this.state.links);
+//    this.d3Links = this.d3Links.data(this.state.links);
     this.d3Faces = this.d3Faces.data(this.state.faces);
 
     this.bindingEngine.collectionObserver(this.state.faces).subscribe(splice => {
@@ -204,30 +204,8 @@ export class QuiltDisplay {
                   .on("click", partial(this.clickFace.bind(this), f));
               this.updateFace(f);
             });
-          }
-        }
-      });
-    });
-
-    this.bindingEngine.collectionObserver(this.state.links).subscribe(splice => {
-      splice.forEach(s => {
-        s.removed.filter(r => r.__proxied__).forEach(r => this.getLinkElem(r).remove());
-
-        if (s.addedCount) {
-          const index = s.index;
-          const newElems = this.state.links.slice(index, index + s.addedCount);
-
-          if (newElems.some(l => !l.__proxied__)) {
-            const newProxies = this.proxyElements(newElems, this.updateLink.bind(this));
-            this.state.links.splice(s.index, s.addedCount, ...newProxies);
-
-            newProxies.forEach(l => {
-              d3.select(this.svgContainer)
-                .select("#link-group")
-                .append("line")
-                  .attr("id", linkId(l));
-              this.updateLink(l);
-            });
+            this.updateViewBox(this.zoom);
+//            this.redraw();
           }
         }
       });
@@ -253,6 +231,7 @@ export class QuiltDisplay {
                   .on("click", partial(this.clickNode.bind(this), n));
               this.updateNode(n);
             });
+            this.updateViewBox(this.zoom);
           }
         }
       });
@@ -287,7 +266,7 @@ export class QuiltDisplay {
   updateFace(f) {
     const face = this.getFaceElem(f);
     face.setAttribute("stroke", f.selected ? "#99b" : "#ccc");
-    face.setAttribute("stroke-width", f.selected ? "1" : "0");
+    face.setAttribute("stroke-width", f.selected ? "2" : "1");
     face.setAttribute("fill", faceBackground(f));
     face.setAttribute("points", f.nodes.map(n => n.map(c => c * this.factor).join(",")).join(" "));
   }
@@ -302,11 +281,11 @@ export class QuiltDisplay {
   }
 
   updateLink(l) {
-    const link = this.getLinkElem(l);
-    link.setAttribute("x1", l.source[0] * this.factor);
-    link.setAttribute("y1", l.source[1] * this.factor);
-    link.setAttribute("x2", l.target[0] * this.factor);
-    link.setAttribute("y2", l.target[1] * this.factor);
+//    const link = this.getLinkElem(l);
+//    link.setAttribute("x1", l.source[0] * this.factor);
+//    link.setAttribute("y1", l.source[1] * this.factor);
+//    link.setAttribute("x2", l.target[0] * this.factor);
+//    link.setAttribute("y2", l.target[1] * this.factor);
   }
 
   updateViewBox(zoom) {

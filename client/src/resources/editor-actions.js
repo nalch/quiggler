@@ -7,7 +7,6 @@ export const loadGraph = (state, data) => {
 
   const graphData = JSON.parse(data.json);
   state.editor.nodes = graphData.nodes;
-  state.editor.links = graphData.links;
   state.editor.faces = graphData.faces;
 
   state.editor.originalGraph = JSON.parse(data.json);
