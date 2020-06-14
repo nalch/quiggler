@@ -28,7 +28,7 @@ class FabricSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class QuiltSerializer(serializers.HyperlinkedModelSerializer):
-    fabrics = FabricSerializer(many=True, read_only=True, default=[])
+    fabrics = FabricSerializer(many=True, default=[])
 
     def create(self, validated_data):
         width, height = validated_data["width"], validated_data["height"]

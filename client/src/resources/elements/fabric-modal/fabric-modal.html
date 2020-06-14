@@ -1,0 +1,33 @@
+<template>
+  <div id="add-fabric-modal" md-modal md-modal.ref="modal" md-on-open-start.delegate="onOpenStart($event)">
+    <div class="modal-content">
+      <h4>Add Fabric</h4>
+      <p>Add an existing fabric or upload a new one</p>
+
+      <div class="row">
+        <div class="col m12">
+          <md-input
+            md-autocomplete="values.bind: fabricNames;"
+            label="Search for a fabric name"
+            value.bind="textValue"
+            md-on-autocomplete.delegate="autocomplete($event.detail)"
+            change.delegate="change($event.detail)">
+          </md-input>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col s2" repeat.for="fabric of fabrics">
+          <md-card image="${fabric.image}" click.delegate="select(fabric)">
+            <div><i if.bind="fabric.selected" class="material-icons">check_circle</i>${fabric.name}</div>
+          </md-card>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <a click.delegate="cancel()" md-button="flat: true;" md-waves="color: accent;" class="modal-action modal-close">Cancel</a>
+      <a click.delegate="add()" md-button="flat: true;" md-waves="color: accent;" class="modal-action modal-close">Add</a>
+    </div>
+  </div>
+</template>

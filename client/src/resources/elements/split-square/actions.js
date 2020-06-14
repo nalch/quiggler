@@ -32,7 +32,7 @@ export const splitSquare = (state, direction) => {
       }
 
       // add new elements
-      state.editor.links.push({"source": coordinates[0], "target": coordinates[1]});
+      state.editor.links.push({"source": coordinates[0], "target": coordinates[1], "index": Math.max(...state.editor.links.map(l => l.index)) + 1});
       state.editor.faces.push({
         "id": f.id,
         "nodes": coordinates[2],

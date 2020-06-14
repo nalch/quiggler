@@ -9,6 +9,7 @@ export function configure(config) {
     PLATFORM.moduleName("./elements/merge-faces/merge-faces"),
     PLATFORM.moduleName("./elements/split-square/split-square"),
     PLATFORM.moduleName("./elements/quilt-modal/quilt-modal"),
+    PLATFORM.moduleName("./elements/fabric-modal/fabric-modal"),
     PLATFORM.moduleName("./elements/select-mode/select-mode"),
     PLATFORM.moduleName("./elements/connect/connect"),
     PLATFORM.moduleName("./elements/zoom/zoom"),
