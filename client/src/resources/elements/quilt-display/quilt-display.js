@@ -7,9 +7,10 @@ import isEqual from "lodash/isEqual";
 import partial from "lodash/partial";
 
 import * as d3 from "d3";
+import * as inside from "point-in-polygon";
 
 import { faceId, nodeId, linkId, faceBackground, nodeRadius } from "./display-settings"
-import { selectFace, selectNode } from "../../editor-actions";
+import { deselect, selectFace, selectNode } from "../../editor-actions";
 import { computeNeighbours } from "../../graph-utils";
 
 const logger = LogManager.getLogger("QuiltDisplay");
@@ -17,30 +18,33 @@ const logger = LogManager.getLogger("QuiltDisplay");
 @inject(Store, BindingEngine)
 @connectTo({
     selector: {
-      state: (store) => store.state.pipe(pluck('editor')),
-      zoom: (store) => store.state.pipe(pluck('zoom'))
+      state: (store) => store.state.pipe(pluck("editor")),
+      zoom: (store) => store.state.pipe(pluck("zoom"))
     }
   })
 export class QuiltDisplay {
   factor = 30;
   margin = 5;
 
+  oldWidth = 0;
+  oldHeight = 0;
   width = 0;
 
   constructor(store, bindingEngine) {
     this.store = store;
     this.bindingEngine = bindingEngine;
 
-    this.store.registerAction('selectFace', selectFace);
-    this.store.registerAction('selectNode', selectNode);
+    this.store.registerAction("selectFace", selectFace);
+    this.store.registerAction("selectNode", selectNode);
+    this.store.registerAction("deselect", deselect);
   }
 
   stateChanged(state) {
     this.state = state;
 
     if (state.width && state.height && this.svgContainer.offsetWidth) {
-      const oldWidth = this.width;
-      const oldHeight = this.height;
+      this.oldWidth = this.width;
+      this.oldHeight = this.height;
       this.width = state.width;
       this.height = state.height;
 
@@ -51,18 +55,6 @@ export class QuiltDisplay {
         logger.info("Setup Observer");
         this.setupObserver();
         logger.info("Setup Done", this.state);
-      }
-      else {
-        // todo: check
-//        if (state.mode !== oldState.mode) {
-//          this.redraw();
-//        }
-        if (this.width !== oldWidth || this.height !== oldHeight) {
-          logger.debug("Update Viewbox");
-          if (this.zoom) {
-            this.updateViewBox(this.zoom);
-          }
-        }
       }
     }
   }
@@ -77,7 +69,6 @@ export class QuiltDisplay {
   createSvg() {
     this.simulation = d3.forceSimulation(this.state.nodes)
       .force("charge", d3.forceManyBody().strength(-80))
-//      .force("link", d3.forceLink(this.state.links).distance(20).strength(1).iterations(10))
       .force("x", d3.forceX())
       .force("y", d3.forceY())
       .stop();
@@ -90,6 +81,26 @@ export class QuiltDisplay {
     this.factor = Math.floor(this.screenWidth / (this.width - 1));
     const viewWidth = this.factor * this.width;
     const viewHeight = this.factor * this.height;
+
+    const drag = d3.drag();
+    drag.on("drag", () => {
+      // todo: add proper data structure
+      const face = this.state.faces.find(
+        f => inside(
+          [d3.event.x / this.factor, d3.event.y / this.factor],
+          f.nodes
+        )
+      );
+      if (face && !face.selected) {
+        face.selected = true;
+      }
+    });
+    drag.on("start", face => {
+      if (!face.selected) {
+        this.store.dispatch(deselect, "deselect");
+      }
+
+    });
 
     this.svg = d3.create("svg")
       .attr("viewBox", [0, 0, viewWidth, viewHeight]);
@@ -120,19 +131,8 @@ export class QuiltDisplay {
         .attr("id", faceId)
         .attr("points", d => d.nodes.map(n => n.map(c => c * this.factor).join(",")).join(" "))
         .attr("title", d => d.id)
-        .on("click", this.clickFace.bind(this));
-
-//    if (this.state.links) {
-//      this.d3Links = this.svg.append("g")
-//          .attr("id", "link-group")
-//          .attr("stroke", "#888")
-//          .attr("stroke-opacity", 0.6)
-//          .attr("stroke-width", 0.5)
-//        .selectAll("line")
-//        .data(this.state.links)
-//        .join("line")
-//          .attr("id", linkId);
-//    }
+        .on("click", this.clickFace.bind(this))
+        .call(drag);
 
     this.d3Nodes = this.svg.append("g")
         .attr("id", "node-group")
@@ -176,10 +176,8 @@ export class QuiltDisplay {
   setupObserver() {
     this.state.faces = this.proxyElements(this.state.faces, this.updateFace.bind(this));
     this.state.nodes = this.proxyElements(this.state.nodes, this.updateNode.bind(this));
-//    this.state.links = this.proxyElements(this.state.links, this.updateLink.bind(this));
 
     this.d3Nodes = this.d3Nodes.data(this.state.nodes);
-//    this.d3Links = this.d3Links.data(this.state.links);
     this.d3Faces = this.d3Faces.data(this.state.faces);
 
     this.bindingEngine.collectionObserver(this.state.faces).subscribe(splice => {
@@ -205,7 +203,6 @@ export class QuiltDisplay {
               this.updateFace(f);
             });
             this.updateViewBox(this.zoom);
-//            this.redraw();
           }
         }
       });
@@ -280,14 +277,6 @@ export class QuiltDisplay {
     node.setAttribute("fill", n.selected ? "#eef" : "99b");
   }
 
-  updateLink(l) {
-//    const link = this.getLinkElem(l);
-//    link.setAttribute("x1", l.source[0] * this.factor);
-//    link.setAttribute("y1", l.source[1] * this.factor);
-//    link.setAttribute("x2", l.target[0] * this.factor);
-//    link.setAttribute("y2", l.target[1] * this.factor);
-  }
-
   updateViewBox(zoom) {
     this.screenWidth = this.svgContainer.offsetWidth;
     this.screenHeight = this.svgContainer.offsetHeight;
@@ -303,7 +292,6 @@ export class QuiltDisplay {
 
   redraw() {
     this.state.faces.forEach(this.updateFace.bind(this));
-    this.state.links.forEach(this.updateLink.bind(this));
     this.state.nodes.forEach(this.updateNode.bind(this));
   }
 }
