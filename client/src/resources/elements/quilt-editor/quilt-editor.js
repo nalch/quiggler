@@ -65,6 +65,8 @@ export class QuiltEditor {
   save() {
     this.deselect();
     const baseGraph = this.state.originalGraph;
+    baseGraph.width = this.state.width;
+    baseGraph.height = this.state.height;
     baseGraph.nodes = this.state.nodes;
     baseGraph.links = this.state.links;
     baseGraph.faces = this.state.faces;
