@@ -65,7 +65,13 @@ export class QuiltDisplay {
     this.zoom = zoom;
     if (this.svg) {
       this.updateViewBox(zoom);
+      this.redraw();
     }
+  }
+
+  computeFactor() {
+    // quilt width + control column
+    return Math.floor(this.screenWidth / (this.width + 1));
   }
 
   createSvg() {
@@ -80,7 +86,7 @@ export class QuiltDisplay {
     }
 
     this.screenWidth = this.svgContainer.offsetWidth;
-    this.factor = Math.floor(this.screenWidth / this.width);
+    this.factor = this.computeFactor();
     const viewWidth = this.factor * (this.width + 1);
     const viewHeight = this.factor * (this.height + 1);
 
@@ -104,8 +110,7 @@ export class QuiltDisplay {
 
     });
 
-    this.svg = d3.create("svg")
-      .attr("viewBox", [this.factor * -1, this.factor * -1, viewWidth, viewHeight]);
+    this.svg = d3.create("svg");
 
     const defs = this.svg.append("defs")
     // size in svg
@@ -214,11 +219,40 @@ export class QuiltDisplay {
     this.d3Nodes = this.d3Nodes.data(this.state.nodes);
     this.d3Faces = this.d3Faces.data(this.state.faces);
 
+    this.bindingEngine.collectionObserver(this.state.nodes).subscribe(splice => {
+      splice.forEach(s => {
+        s.removed.filter(r => r.__proxied__).forEach(r => this.getNodeElem(r).remove());
+
+        if (s.addedCount) {
+          logger.debug("Nodes added");
+          const index = s.index;
+          const newElems = this.state.nodes.slice(index, index + s.addedCount);
+
+          if (newElems.some(n => !n.__proxied__)) {
+            const newProxies = this.proxyElements(newElems, this.updateNode.bind(this));
+            this.state.nodes.splice(s.index, s.addedCount, ...newProxies);
+
+            newProxies.forEach(n => {
+              d3.select(this.svgContainer)
+                .select("#node-group")
+                .append("circle")
+                  .attr("id", nodeId(n))
+                  .on("click", partial(this.clickNode.bind(this), n));
+              this.updateNode(n);
+            });
+          }
+        }
+      });
+      this.updateViewBox(this.zoom);
+      this.redraw(true, false);
+    });
+
     this.bindingEngine.collectionObserver(this.state.faces).subscribe(splice => {
       splice.forEach(s => {
         s.removed.filter(r => r.__proxied__).forEach(r => this.getFaceElem(r).remove());
 
         if (s.addedCount) {
+          logger.debug("Faces added");
           const index = s.index;
           const newElems = this.state.faces.slice(index, index + s.addedCount);
 
@@ -236,38 +270,12 @@ export class QuiltDisplay {
                   .on("click", partial(this.clickFace.bind(this), f));
               this.updateFace(f);
             });
-            this.updateViewBox(this.zoom);
           }
         }
       });
+      this.updateViewBox(this.zoom);
+      this.redraw(false, true);
     });
-
-    this.bindingEngine.collectionObserver(this.state.nodes).subscribe(splice => {
-      splice.forEach(s => {
-        s.removed.filter(r => r.__proxied__).forEach(r => this.getNodeElem(r).remove());
-
-        if (s.addedCount) {
-          const index = s.index;
-          const newElems = this.state.nodes.slice(index, index + s.addedCount);
-
-          if (newElems.some(n => !n.__proxied__)) {
-            const newProxies = this.proxyElements(newElems, this.updateNode.bind(this));
-            this.state.nodes.splice(s.index, s.addedCount, ...newProxies);
-
-            newProxies.forEach(n => {
-              d3.select(this.svgContainer)
-                .select("#node-group")
-                .append("circle")
-                  .attr("id", nodeId(n))
-                  .on("click", partial(this.clickNode.bind(this), n));
-              this.updateNode(n);
-            });
-            this.updateViewBox(this.zoom);
-          }
-        }
-      });
-    });
-
   }
 
   clickFace(f) {
@@ -313,20 +321,33 @@ export class QuiltDisplay {
   }
 
   updateViewBox(zoom) {
+    logger.debug(`Update Viewbox @ ${zoom.level}% (${this.width}x${this.height})`);
     this.screenWidth = this.svgContainer.offsetWidth;
     this.screenHeight = this.svgContainer.offsetHeight;
-    this.factor = Math.floor(this.screenWidth / (this.width - 1));
-    const viewWidth = this.factor * this.width * (100/zoom.level);
-    const viewHeight = this.factor * this.height * (100/zoom.level);
+    this.factor = this.computeFactor();
+    const viewWidth = this.factor * (this.width + 1) * (100/zoom.level);
+    const viewHeight = this.factor * (this.height + 1) * (100/zoom.level);
 
     const xOffset = this.screenWidth * (zoom.xOffset/100);
     const yOffset = this.screenHeight * (zoom.yOffset/100);
 
+    logger.debug(`Screenwidth: ${this.screenWidth} x ${this.screenHeight} @ Factor ${this.factor}`);
+    logger.debug(`Offset: ${xOffset} x ${yOffset}`);
+    logger.debug(`ViewSize: ${viewWidth}x${viewHeight}`);
+
     this.svg.attr("viewBox", [xOffset || this.factor * -1, yOffset || this.factor * -1, viewWidth, viewHeight]);
   }
 
-  redraw() {
-    this.state.faces.forEach(this.updateFace.bind(this));
-    this.state.nodes.forEach(this.updateNode.bind(this));
+  redraw(nodes=true, faces=true, controls=true) {
+    logger.debug(`Redraw: Nodes ${nodes}, faces ${faces}`);
+    if (nodes) {
+      this.state.nodes.forEach(this.updateNode.bind(this));
+    }
+    if (faces) {
+      this.state.faces.forEach(this.updateFace.bind(this));
+    }
+    if (controls) {
+      this.addControls(this.svg);
+    }
   }
 }
