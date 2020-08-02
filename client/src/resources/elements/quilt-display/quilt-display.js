@@ -11,6 +11,7 @@ import * as inside from "point-in-polygon";
 
 import { faceId, nodeId, linkId, faceBackground, nodeRadius } from "./display-settings"
 import { deselect, selectFace, selectNode } from "../../editor-actions";
+import { addLine } from "../add-line/actions";
 import { computeNeighbours } from "../../graph-utils";
 
 const logger = LogManager.getLogger("QuiltDisplay");
@@ -37,6 +38,7 @@ export class QuiltDisplay {
     this.store.registerAction("selectFace", selectFace);
     this.store.registerAction("selectNode", selectNode);
     this.store.registerAction("deselect", deselect);
+    this.store.registerAction("addLine", addLine);
   }
 
   stateChanged(state) {
@@ -78,9 +80,9 @@ export class QuiltDisplay {
     }
 
     this.screenWidth = this.svgContainer.offsetWidth;
-    this.factor = Math.floor(this.screenWidth / (this.width - 1));
-    const viewWidth = this.factor * this.width;
-    const viewHeight = this.factor * this.height;
+    this.factor = Math.floor(this.screenWidth / this.width);
+    const viewWidth = this.factor * (this.width + 1);
+    const viewHeight = this.factor * (this.height + 1);
 
     const drag = d3.drag();
     drag.on("drag", () => {
@@ -103,7 +105,7 @@ export class QuiltDisplay {
     });
 
     this.svg = d3.create("svg")
-      .attr("viewBox", [0, 0, viewWidth, viewHeight]);
+      .attr("viewBox", [this.factor * -1, this.factor * -1, viewWidth, viewHeight]);
 
     const defs = this.svg.append("defs")
     // size in svg
@@ -120,7 +122,7 @@ export class QuiltDisplay {
         .attr("y", 0)
         .attr("width", size)
         .attr("height", size)
-        .attr("xlink:href", d => d.image);
+        .attr("href", d => d.image);
 
     this.d3Faces = this.svg.append("g")
         .attr("id", "face-group")
@@ -130,9 +132,12 @@ export class QuiltDisplay {
       .append("polygon")
         .attr("id", faceId)
         .attr("points", d => d.nodes.map(n => n.map(c => c * this.factor).join(",")).join(" "))
+        .attr("data-points", d => d.nodes.map(n => n.join(",")).join(" "))
         .attr("title", d => d.id)
         .on("click", this.clickFace.bind(this))
         .call(drag);
+
+    this.addControls(this.svg);
 
     this.d3Nodes = this.svg.append("g")
         .attr("id", "node-group")
@@ -148,6 +153,35 @@ export class QuiltDisplay {
         .on("click", this.clickNode.bind(this));
 
     this.svgContainer.appendChild(this.svg.node());
+  }
+
+  addControls(svg) {
+    const size = this.factor;
+
+    const controlData = [];
+    for(let i=0; i<this.width + 1; i++) {
+      controlData.push(i * this.factor - size / 2);
+    }
+
+    svg.append("g")
+        .attr("id", "controls-group")
+      .selectAll("image")
+      .data(controlData)
+      .enter()
+      .append("image")
+        .attr("x", d => d)
+        .attr("y", this.factor * -1)
+        .attr("width", size)
+        .attr("fill", "#26a69a")
+        .attr("href", "http://127.0.0.1:8000/media/fabrics/add-location.svg")
+        .attr("style", "opacity: 0")
+        .on("mouseover", (_, idx, controls) => {controls[idx].style.opacity = 1;})
+        .on("mouseout", (_, idx, controls) => {controls[idx].style.opacity = 0})
+        .on("click", this.clickControl.bind(this));
+  }
+
+  clickControl(_, idx) {
+    this.store.dispatch(addLine, idx);
   }
 
   proxyElements(elements, setterFunction) {
@@ -266,6 +300,7 @@ export class QuiltDisplay {
     face.setAttribute("stroke-width", f.selected ? "2" : "1");
     face.setAttribute("fill", faceBackground(f));
     face.setAttribute("points", f.nodes.map(n => n.map(c => c * this.factor).join(",")).join(" "));
+    face.setAttribute("data-points", f.nodes.map(n => n.join(",")).join(" "));
   }
 
   updateNode(n) {
@@ -287,7 +322,7 @@ export class QuiltDisplay {
     const xOffset = this.screenWidth * (zoom.xOffset/100);
     const yOffset = this.screenHeight * (zoom.yOffset/100);
 
-    this.svg.attr("viewBox", [xOffset || 0, yOffset || 0, viewWidth, viewHeight]);
+    this.svg.attr("viewBox", [xOffset || this.factor * -1, yOffset || this.factor * -1, viewWidth, viewHeight]);
   }
 
   redraw() {

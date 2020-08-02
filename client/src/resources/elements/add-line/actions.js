@@ -1,15 +1,16 @@
+import { LogManager } from "aurelia-framework";
+
 import { getEdges, connectEdges, polyIntersect } from "../../graph-utils";
 
-export const addLine = (state, direction) => {
-  // example: column at index 1
-  const index = 1;
+const logger = LogManager.getLogger("AddLineAction");
 
+export const addLine = (state, index) => {
   state.editor.width += 1;
 
   // create new nodes/faces
   const newNodes = [];
   const newFaces = [];
-  const startId = Math.max(...state.editor.faces.map(f => f.id)) + 1;
+  const startId = Math.max(...state.editor.faces.map(f => Number.isInteger(f.id) ? f.id : -1)) + 1;
   for (let row=0; row <= state.editor.height; row++) {
     newNodes.push({
       id: [state.editor.width, row],
@@ -32,25 +33,44 @@ export const addLine = (state, direction) => {
   });
 
   stretchFaces.forEach(f => {
+    logger.debug("stretching face", f);
     const sortedNodes = connectEdges(
       Array.from(getEdges([f]).entries())
         .map(([edgeId, edgeInfo]) => edgeInfo[0])
     );
 
-    const facePoints = [];
+    const newFace = [];
     sortedNodes.forEach((point, idx) => {
-      const nextPoint = idx < sortedNodes.length - 2 ? sortedNodes[idx+1] : sortedNodes[0];
+      const firstPoint = idx === 0;
+      const lastPoint = idx === (sortedNodes.length - 1)
+      const nextPoint = lastPoint ? sortedNodes[0] : sortedNodes[idx+1];
+      const nextRight = nextPoint[0] > index;
+      const nextLeft = nextPoint[0] < index;
+      const onIndex = point[0] === index;
 
-      // left -> right
-      facePoints.push([point[0] <= index ? point[0] : point[0] + 1, point[1]]);
+      logger.debug(point, " -> ", nextPoint);
 
-      // index -> right
-      if (point[0] === index && nextPoint[0] > idx) {
-        facePoints.push([point[0] + 1, point[1]]);
+      if (firstPoint && onIndex) {
+        logger.debug("Adding first point on index");
+        newFace.push([point[0], point[1]]);
+      }
+
+      if (point[0] < index) {
+        logger.debug("Copy point strictly left to the index");
+        newFace.push([point[0], point[1]]);
+      }
+
+      if (point[0] >= index) {
+        logger.debug("Move point on or right to the index");
+        newFace.push([point[0] + 1, point[1]]);
+      }
+
+      if (lastPoint && onIndex){
+        newFace.push([point[0], point[1]])
       }
     });
 
-    f.nodes = facePoints;
+    f.nodes = newFace;
   });
 
   // add new faces
