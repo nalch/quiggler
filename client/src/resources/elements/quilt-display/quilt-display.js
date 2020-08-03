@@ -163,15 +163,20 @@ export class QuiltDisplay {
   addControls(svg) {
     const size = this.factor;
 
-    const controlData = [];
+    const controlDataHorizontal = [];
     for(let i=0; i<this.width + 1; i++) {
-      controlData.push(i * this.factor - size / 2);
+      controlDataHorizontal.push(i * this.factor - size / 2);
+    }
+
+    const controlDataVertical = [];
+    for(let i=0; i<this.height + 1; i++) {
+      controlDataVertical.push((i+1) * this.factor - size / 2);
     }
 
     svg.append("g")
         .attr("id", "controls-group")
       .selectAll("image")
-      .data(controlData)
+      .data(controlDataHorizontal)
       .enter()
       .append("image")
         .attr("x", d => d)
@@ -180,13 +185,33 @@ export class QuiltDisplay {
         .attr("fill", "#26a69a")
         .attr("href", "http://127.0.0.1:8000/media/fabrics/add-location.svg")
         .attr("style", "opacity: 0")
+        .attr("data-orientation", "horizontal")
+        .on("mouseover", (_, idx, controls) => {controls[idx].style.opacity = 1;})
+        .on("mouseout", (_, idx, controls) => {controls[idx].style.opacity = 0})
+        .on("click", this.clickControl.bind(this));
+
+    svg.append("g")
+        .attr("id", "controls-group-vertical")
+      .selectAll("image")
+      .data(controlDataVertical)
+      .enter()
+      .append("image")
+        .attr("x", d => -d)
+        .attr("y", this.factor * -1)
+        .attr("width", size)
+        .attr("fill", "#26a69a")
+        .attr("href", "http://127.0.0.1:8000/media/fabrics/add-location.svg")
+        .attr("style", "opacity: 0")
+        .attr("data-orientation", "vertical")
+        .attr("transform", "rotate(-90 0 0)")
         .on("mouseover", (_, idx, controls) => {controls[idx].style.opacity = 1;})
         .on("mouseout", (_, idx, controls) => {controls[idx].style.opacity = 0})
         .on("click", this.clickControl.bind(this));
   }
 
-  clickControl(_, idx) {
-    this.store.dispatch(addLine, idx);
+  clickControl(_, idx, controls) {
+    const orientation = controls[idx].getAttribute("data-orientation");
+    this.store.dispatch(addLine, idx, orientation);
   }
 
   proxyElements(elements, setterFunction) {
