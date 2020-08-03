@@ -9,6 +9,7 @@ import * as d3 from "d3";
 import materialize from 'materialize-css';
 
 import { deselect, loadGraph, selectAll } from "../../editor-actions"
+import * as config from "../../../../config/environment.json";
 
 @inject(Store, HttpClient, MdToastService)
 @connectTo((store) => store.state.pipe(pluck('editor')))
@@ -27,7 +28,7 @@ export class QuiltEditor {
     this.client = client;
     this.client.configure(config => {
       config
-        .withBaseUrl('http://127.0.0.1:8000/api/')
+        .withBaseUrl(config.apiBase)
         .withDefaults({
           headers: {
             'Content-Type': 'application/json',
@@ -43,7 +44,7 @@ export class QuiltEditor {
 
   activate(params) {
     this.slug = params.slug;
-    return d3.json(`http://127.0.0.1:8000/api/quilts/${this.slug}/`).then(data => {
+    return d3.json(`${config.apiBase}quilts/${this.slug}/`).then(data => {
       this.store.dispatch(loadGraph, data);
       this.loading = false;
     });
