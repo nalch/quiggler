@@ -49,6 +49,11 @@
     "@babel/preset-env": "^7.4.2",
     "@babel/core": "^7.4.0",
     "@babel/register": "^7.4.0",
+    "postcss-loader": "^3.0.0",
+    "autoprefixer": "^9.4.8",
+    "cssnano": "^4.1.10",
+    "sass-loader": "^7.1.0",
+    "node-sass": "^4.11.0",
     "html-webpack-plugin": "^3.2.0",
     "copy-webpack-plugin": "^5.0.0",
     "mini-css-extract-plugin": "^0.4.3",
@@ -74,14 +79,23 @@
     "jest-transform-stub": "^2.0.0",
     "aurelia-loader-nodejs": "^1.0.1",
     "aurelia-pal-nodejs": "^1.2.0",
-    "babel-jest": "^24.5.0"
+    "babel-jest": "^24.5.0",
+    "aurelia-protractor-plugin": "^1.0.6",
+    "protractor": "^5.4.2",
+    "gulp-protractor": "^4.1.1",
+    "wait-on": "^3.2.0"
   },
+  "browserslist": [
+    "defaults"
+  ],
   "scripts": {
     "build": "webpack --env.production --extractCss",
     "start": "webpack-dev-server --extractCss",
     "build:dev": "webpack --extractCss",
     "analyze": "webpack --env.production --analyze",
-    "test": "au test"
+    "test": "au test",
+    "e2e": "au protractor",
+    "e2e:headless": "au protractor --start --headless"
   },
   "engines": {
     "node": ">=8.9.0"

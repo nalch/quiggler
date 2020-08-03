@@ -23,8 +23,23 @@ const baseUrl = '/';
 
 const cssRules = [
   { loader: 'css-loader' },
+  {
+    loader: 'postcss-loader',
+    options: { plugins: () => [
+      require('autoprefixer')(),
+      require('cssnano')()
+    ] }
+  }
 ];
 
+const sassRules = [
+  {
+     loader: "sass-loader",
+     options: {
+       includePaths: ["node_modules"]
+     }
+  }
+];
 
 module.exports = ({ production } = {}, {extractCss, analyze, tests, hmr, port, host } = {}) => ({
   resolve: {
@@ -131,6 +146,19 @@ module.exports = ({ production } = {}, {extractCss, analyze, tests, hmr, port, h
         // because Aurelia would try to require it again in runtime
         use: cssRules
       },
+      {
+        test: /\.scss$/,
+        use: extractCss ? [{
+          loader: MiniCssExtractPlugin.loader
+        }, ...cssRules, ...sassRules
+        ]: ['style-loader', ...cssRules, ...sassRules],
+        issuer: /\.[tj]s$/i
+      },
+      {
+        test: /\.scss$/,
+        use: [...cssRules, ...sassRules],
+        issuer: /\.html?$/i
+      },
       { test: /\.html$/i, loader: 'html-loader' },
       {
         test: /\.js$/i, loader: 'babel-loader', exclude: nodeModulesDir,
@@ -151,6 +179,8 @@ module.exports = ({ production } = {}, {extractCss, analyze, tests, hmr, port, h
     ...when(!tests, new DuplicatePackageCheckerPlugin()),
     new AureliaPlugin(),
     new ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery',
       'Promise': ['promise-polyfill', 'default']
     }),
     new ModuleDependenciesPlugin({
@@ -158,6 +188,18 @@ module.exports = ({ production } = {}, {extractCss, analyze, tests, hmr, port, h
     }),
     new HtmlWebpackPlugin({
       template: 'index.ejs',
+      minify: production ? {
+        removeComments: true,
+        collapseWhitespace: true,
+        collapseInlineTagWhitespace: true,
+        collapseBooleanAttributes: true,
+        removeAttributeQuotes: true,
+        minifyCSS: true,
+        minifyJS: true,
+        removeScriptTypeAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        ignoreCustomFragments: [/\${.*?}/g]
+      } : undefined,
       metadata: {
         // available in index.ejs //
         title, baseUrl
