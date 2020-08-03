@@ -26,7 +26,7 @@ sdist: build_reqs
 lint: dev_reqs plain-lint
 
 serve-client:
-	cd client && au run
+	cd client && au run --env development
 
 serve-api:
 	poetry run python manage.py migrate
