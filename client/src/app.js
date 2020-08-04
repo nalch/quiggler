@@ -8,7 +8,7 @@ export class App {
     config.title = "Quiggler";
     config.map([
       {
-        route: "home/",
+        route: ['', 'home'],
         name: "home",
         moduleId: PLATFORM.moduleName("./resources/elements/home/home")
       },
@@ -16,7 +16,7 @@ export class App {
         route: "quilts/:slug/edit/",
         name: "quilt-editor",
         moduleId: PLATFORM.moduleName("./resources/elements/quilt-editor/quilt-editor")
-      },
+      }
     ]);
   }
 }

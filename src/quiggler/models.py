@@ -42,4 +42,4 @@ class Quilt(SlugModel):
 
     json = models.TextField(blank=True, null=True)
 
-    # todo krsc: nodes, links, faces
+    preview = models.ImageField(upload_to="fabrics/", default=None, blank=True, null=True)

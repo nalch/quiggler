@@ -63,6 +63,12 @@ export class QuiltEditor {
     this.store.dispatch(deselect);
   }
 
+  getSvg() {
+    const cloneSvg = $("#svg-container").clone()[0];
+    // todo krsc: remove controls, change viewbox
+    return cloneSvg.outerHTML;
+  }
+
   save() {
     this.deselect();
     const baseGraph = this.state.originalGraph;
@@ -72,10 +78,11 @@ export class QuiltEditor {
     baseGraph.links = this.state.links;
     baseGraph.faces = this.state.faces;
     baseGraph.fabrics = this.state.fabrics;
-    return this.client.fetch(`quilts/${this.slug}/`, {
-      method: 'PATCH',
-      body: json({"json": JSON.stringify(baseGraph)})
-    }).then(response => {
+
+    const body = json({"json": JSON.stringify(baseGraph), "svg": this.getSvg()})
+    const url = `${config.apiBase}quilts/${this.slug}/`;
+
+    return this.client.fetch(url, {method: 'PATCH', body: body}).then(response => {
       this.toast.show("Design saved!", 4000, "rounded btn")
     }).catch(error => this.toast.show("Could not save design!", 4000, "rounded red"));
   }

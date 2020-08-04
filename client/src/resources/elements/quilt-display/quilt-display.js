@@ -110,7 +110,7 @@ export class QuiltDisplay {
 
     });
 
-    this.svg = d3.create("svg");
+    this.svg = d3.create("svg").attr("id", "svg-container");
 
     const defs = this.svg.append("defs")
     // size in svg
@@ -175,6 +175,7 @@ export class QuiltDisplay {
 
     svg.append("g")
         .attr("id", "controls-group")
+        .attr("class", "controls-group")
       .selectAll("image")
       .data(controlDataHorizontal)
       .enter()
@@ -192,6 +193,7 @@ export class QuiltDisplay {
 
     svg.append("g")
         .attr("id", "controls-group-vertical")
+        .attr("class", "controls-group")
       .selectAll("image")
       .data(controlDataVertical)
       .enter()

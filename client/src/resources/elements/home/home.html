@@ -1,3 +1,26 @@
 <template>
-  <h1>home</h1>
+
+  <h1>Quiggler</h1>
+  <section>
+
+    <article class="quilt-part" repeat.for="quilt of quilts">
+      <figure>
+        <a route-href="route: quilt-editor; params.bind: { slug: quilt.slug }">
+          <h2>${quilt.name}</h2>
+          <p>${quilt.width}x${quilt.height}</p>
+        </a>
+      </figure>
+      <img alt src='${quilt.preview}'/>
+		</article>
+
+  </section>
+
+  <svg width="0" height="0">
+    <defs>
+      <clipPath id="hexagono" clipPathUnits="objectBoundingBox">
+        <polygon points=".25 0, .75 0, 1 .5, .75 1, .25 1, 0 .5" />
+      </clipPath>
+    </defs>
+  </svg>
+
 </template>

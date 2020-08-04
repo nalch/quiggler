@@ -29,6 +29,7 @@ class FabricSerializer(serializers.HyperlinkedModelSerializer):
 
 class QuiltSerializer(serializers.HyperlinkedModelSerializer):
     fabrics = FabricSerializer(many=True, read_only=True, default=[])
+    svg = serializers.CharField(write_only=True, default=None)
 
     def create(self, validated_data):
         width, height = validated_data["width"], validated_data["height"]
@@ -43,4 +44,17 @@ class QuiltSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Quilt
-        fields = ("slug", "url", "name", "type", "width", "height", "width_in_cm", "height_in_cm", "json", "fabrics")
+        fields = (
+            "slug",
+            "url",
+            "name",
+            "type",
+            "width",
+            "height",
+            "width_in_cm",
+            "height_in_cm",
+            "json",
+            "fabrics",
+            "svg",
+            "preview"
+        )
