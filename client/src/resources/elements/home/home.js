@@ -5,6 +5,7 @@ import * as config from "../../../../config/environment.json";
 
 @inject(HttpClient)
 export class Home {
+  colours = ["red", "green", "blue"];
 
   constructor(client) {
     this.client = client.configure(c => {c.withBaseUrl(config.apiBase)});
@@ -16,6 +17,11 @@ export class Home {
     .then(data => {
       this.quilts = data;
     });
+  }
+
+  colour() {
+    const index = Math.floor(Math.random() * this.colours.length);
+    return this.colours[index];
   }
 
 }

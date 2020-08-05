@@ -3,7 +3,7 @@
   <h1>Quiggler</h1>
   <section>
 
-    <article class="quilt-part" repeat.for="quilt of quilts">
+    <article class="quilt-part ${colour()}" repeat.for="quilt of quilts">
       <figure>
         <a route-href="route: quilt-editor; params.bind: { slug: quilt.slug }">
           <h2>${quilt.name}</h2>

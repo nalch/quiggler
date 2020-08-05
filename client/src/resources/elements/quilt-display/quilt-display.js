@@ -161,6 +161,10 @@ export class QuiltDisplay {
   }
 
   addControls(svg) {
+    if (this.controlsInitialized) {
+      return;
+    }
+
     const size = this.factor;
 
     const controlDataHorizontal = [];
@@ -209,6 +213,8 @@ export class QuiltDisplay {
         .on("mouseover", (_, idx, controls) => {controls[idx].style.opacity = 1;})
         .on("mouseout", (_, idx, controls) => {controls[idx].style.opacity = 0})
         .on("click", this.clickControl.bind(this));
+
+    this.controlsInitialized = true;
   }
 
   clickControl(_, idx, controls) {

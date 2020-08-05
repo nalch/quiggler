@@ -65,7 +65,15 @@ export class QuiltEditor {
 
   getSvg() {
     const cloneSvg = $("#svg-container").clone()[0];
-    // todo krsc: remove controls, change viewbox
+    let child = cloneSvg.getElementsByClassName("controls-group")[0];
+    while (child) {
+      child.remove();
+      child = cloneSvg.getElementsByClassName("controls-group")[0];
+    }
+
+    const viewBox = cloneSvg.getAttribute("viewBox").split(",");
+    cloneSvg.setAttribute("viewBox", `0,0,${viewBox[2]},${viewBox[3]}`);
+
     return cloneSvg.outerHTML;
   }
 
