@@ -40,6 +40,8 @@ class QuiltSerializer(serializers.HyperlinkedModelSerializer):
 
         validated_data["json"] = json.dumps(json_data)
 
+        validated_data.pop("svg")
+
         return super().create(validated_data)
 
     class Meta:

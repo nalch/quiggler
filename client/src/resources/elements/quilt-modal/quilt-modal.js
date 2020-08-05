@@ -2,6 +2,8 @@ import { inject } from "aurelia-framework";
 import { HttpClient, json } from "aurelia-fetch-client";
 import { MdTapTarget, MdToastService } from "aurelia-materialize-bridge";
 
+import * as config from "../../../../config/environment.json";
+
 @inject(HttpClient, MdToastService)
 export class QuiltModal {
   constructor(client, toast) {
@@ -20,7 +22,7 @@ export class QuiltModal {
       type: "square"
     };
 
-    return this.client.fetch("quilts/", {
+    return this.client.fetch("http://127.0.0.1:8000/api/quilts/", {
       method: 'POST',
       body: json(quiltData)
     }).then(response => {
